@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  sbominsight:
+    image: sangam14/sbominsight:latest
+    volumes:
+      - sbom-output:/output
+    entrypoint: ["/bin/sh", "-c", "./sbominsight -i alpine:latest -o json > /output/sbom.json && chmod 644 /output/sbom.json"]
+
+  jsoncrack:
+    image: sangam14/jsoncrack
+    ports:
+      - "8080:8080"
+    volumes:
+      - sbom-output:/app/public/json
+      - ./index.html:/app/public/index.html
+
+volumes:
+  sbom-output:
+    driver: local
