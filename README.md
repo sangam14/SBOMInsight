@@ -6,11 +6,11 @@ SBOMInsight - Gain deep insights and secure your software supply chain
 ## Usage 
 
 To generate an SBOM from an image and output it in JSON format:
-
+```
 > sbominsight -i alpine:latest      
-
+```
 To generate an SBOM from an image and output it in table format:
-
+```
 > sbominsight -i alpine:latest -o table 
 
 +------------------+------------------------+-------------+------+
@@ -31,7 +31,7 @@ To generate an SBOM from an image and output it in table format:
 | 692d7c5cf4a3b25a | ssl_client             | 1.36.1-r29  | apk  |
 | d8258d3d7c48cfbf | zlib                   | 1.3.1-r1    | apk  |
 +------------------+------------------------+-------------+------+
-
+```
 
 ## Installation
 
