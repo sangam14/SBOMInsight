@@ -4,8 +4,9 @@ go 1.22.5
 
 require (
 	github.com/anchore/go-collections v0.0.0-20240216214351-5baf374cca6f
-	github.com/anchore/stereoscope v0.0.3-0.20240705165118-e46739e21796
 	github.com/anchore/syft v1.9.0
+	github.com/olekukonko/tablewriter v0.0.5
+	github.com/sirupsen/logrus v1.9.3
 	github.com/spf13/cobra v1.8.1
 )
 
@@ -32,6 +33,7 @@ require (
 	github.com/anchore/go-struct-converter v0.0.0-20221118182256-c68fdcfa2092 // indirect
 	github.com/anchore/go-version v1.2.2-0.20200701162849-18adb9c92b9b // indirect
 	github.com/anchore/packageurl-go v0.1.1-0.20240507183024-848e011fc24f // indirect
+	github.com/anchore/stereoscope v0.0.3-0.20240705165118-e46739e21796 // indirect
 	github.com/andybalholm/brotli v1.0.4 // indirect
 	github.com/aquasecurity/go-pep440-version v0.0.0-20210121094942-22b2f8951d46 // indirect
 	github.com/aquasecurity/go-version v0.0.0-20210121072130-637058cfe492 // indirect
@@ -120,7 +122,6 @@ require (
 	github.com/moby/sys/signal v0.7.0 // indirect
 	github.com/muesli/termenv v0.15.2 // indirect
 	github.com/nwaples/rardecode v1.1.0 // indirect
-	github.com/olekukonko/tablewriter v0.0.5 // indirect
 	github.com/opencontainers/go-digest v1.0.0 // indirect
 	github.com/opencontainers/image-spec v1.1.0 // indirect
 	github.com/opencontainers/runc v1.1.12 // indirect
@@ -143,7 +144,6 @@ require (
 	github.com/secDre4mer/pkcs7 v0.0.0-20240322103146-665324a4461d // indirect
 	github.com/sergi/go-diff v1.3.2-0.20230802210424-5b0b94c5c0d3 // indirect
 	github.com/shopspring/decimal v1.2.0 // indirect
-	github.com/sirupsen/logrus v1.9.3 // indirect
 	github.com/skeema/knownhosts v1.2.2 // indirect
 	github.com/sourcegraph/conc v0.3.0 // indirect
 	github.com/spdx/tools-golang v0.5.5 // indirect

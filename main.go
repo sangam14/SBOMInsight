@@ -35,17 +35,21 @@ func main() {
 			src := getSource(image)
 
 			// Catalog the given source and return an SBOM
-			sbom := getSBOM(src, pkgcataloging.InstalledTag, pkgcataloging.DirectoryTag)
+			sbom := getSBOM(src, pkgcataloging.InstalledTag, pkgcataloging.DirectoryTag, pkgcataloging.ImageTag)
 
 			// Print the SBOM in the specified format
 			printSBOM(sbom, outputFormat)
+
+			// Print cataloged contents information
+			printCatalogedContents(sbom)
+
 		},
 	}
 
 	// Define the image flag for generating SBOM
 	rootCmd.Flags().StringVarP(&image, "image", "i", "", "Image reference to generate SBOM from")
 	// Define the output format flag
-	rootCmd.Flags().StringVarP(&outputFormat, "output", "o", "json", "Output format (json or table)")
+	rootCmd.Flags().StringVarP(&outputFormat, "output", "o", "json", "Output format (json, table)")
 
 	// Execute the root command
 	if err := rootCmd.Execute(); err != nil {
@@ -82,10 +86,12 @@ func getSBOM(src source.Source, defaultTags ...string) sbom.SBOM {
 				WithDefaults(defaultTags...),
 		)
 
+	// Generate SBOM using syft
 	s, err := syft.CreateSBOM(context.Background(), src, cfg)
 	if err != nil {
 		panic(err)
 	}
+
 	return *s
 }
 
@@ -128,6 +134,15 @@ func printSBOMAsTable(s sbom.SBOM) {
 
 	// Render the table to the standard output
 	table.Render()
+}
+
+// printCatalogedContents prints cataloged contents information
+func printCatalogedContents(s sbom.SBOM) {
+	fmt.Println("Cataloged contents:")
+	fmt.Printf("  ✔ Packages\t\t\t\t[%d packages]\n", len(s.Artifacts.Packages.Sorted()))
+	fmt.Printf("  ✔ File digests\t\t\t[%d files]\n", len(s.Artifacts.FileDigests))
+	fmt.Printf("  ✔ File metadata\t\t\t[%d locations]\n", len(s.Artifacts.FileMetadata))
+	fmt.Printf("  ✔ Executables\t\t\t\t[%d executables]\n", len(s.Artifacts.Executables))
 }
 
 // transformSBOM transforms the SBOM to a JSON-friendly format
