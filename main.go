@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"net/http"
 	"os"
 	"strings"
 
@@ -21,11 +22,17 @@ import (
 func main() {
 	var image string
 	var outputFormat string
+	var serverMode bool
 
 	rootCmd := &cobra.Command{
 		Use:   "sbominsight",
 		Short: "sbominsight generates SBOM from container images and directories",
 		Run: func(cmd *cobra.Command, args []string) {
+			if serverMode {
+				startServer()
+				return
+			}
+
 			if image == "" {
 				logrus.Error("Image reference is required to generate SBOM")
 				os.Exit(1)
@@ -42,19 +49,36 @@ func main() {
 
 			// Print cataloged contents information
 			printCatalogedContents(sbom)
-
 		},
 	}
 
-	// Define the image flag for generating SBOM
 	rootCmd.Flags().StringVarP(&image, "image", "i", "", "Image reference to generate SBOM from")
-	// Define the output format flag
 	rootCmd.Flags().StringVarP(&outputFormat, "output", "o", "json", "Output format (json, table)")
+	rootCmd.Flags().BoolVarP(&serverMode, "server", "s", false, "Run in server mode")
 
-	// Execute the root command
 	if err := rootCmd.Execute(); err != nil {
 		logrus.Fatalf("Error executing command: %v", err)
 	}
+}
+
+// startServer starts the HTTP server to serve SBOM data
+func startServer() {
+	http.HandleFunc("/sbom", func(w http.ResponseWriter, r *http.Request) {
+		image := r.URL.Query().Get("image")
+		if image == "" {
+			http.Error(w, "Image reference is required", http.StatusBadRequest)
+			return
+		}
+
+		src := getSource(image)
+		sbom := getSBOM(src, pkgcataloging.InstalledTag, pkgcataloging.DirectoryTag, pkgcataloging.ImageTag)
+
+		w.Header().Set("Content-Type", "application/json")
+		json.NewEncoder(w).Encode(transformSBOM(sbom))
+	})
+
+	fmt.Println("Server is running on http://localhost:8080")
+	logrus.Fatal(http.ListenAndServe(":8080", nil))
 }
 
 // sanitizeFilename replaces special characters in a string to create a valid filename

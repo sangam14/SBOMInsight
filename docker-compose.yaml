@@ -2,7 +2,9 @@ version: '3.8'
 
 services:
   sbominsight:
-    image: sangam14/sbominsight:latest
+    build:
+      context: .  # Use the current directory as the context
+      dockerfile: Dockerfile
     volumes:
       - sbom-output:/output
     entrypoint: ["/bin/sh", "-c", "./sbominsight -i alpine:latest -o json > /output/sbom.json && chmod 644 /output/sbom.json"]
@@ -13,7 +15,6 @@ services:
       - "8080:8080"
     volumes:
       - sbom-output:/app/public/json
-      - ./index.html:/app/public/index.html
 
 volumes:
   sbom-output:
