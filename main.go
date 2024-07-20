@@ -17,12 +17,15 @@ import (
 	"github.com/olekukonko/tablewriter"
 	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"github.com/tmc/langchaingo/llms"
+	"github.com/tmc/langchaingo/llms/ollama"
 )
 
 func main() {
 	var image string
 	var outputFormat string
 	var serverMode bool
+	var generateRecommendations bool
 
 	rootCmd := &cobra.Command{
 		Use:   "sbominsight",
@@ -49,12 +52,20 @@ func main() {
 
 			// Print cataloged contents information
 			printCatalogedContents(sbom)
+
+			// Generate and print SBOM recommendations if the flag is set
+			if generateRecommendations {
+				recommendations := getVulnerabilityRemediations(sbom)
+				fmt.Println("Vulnerability Remediations:")
+				fmt.Println(recommendations)
+			}
 		},
 	}
 
 	rootCmd.Flags().StringVarP(&image, "image", "i", "", "Image reference to generate SBOM from")
 	rootCmd.Flags().StringVarP(&outputFormat, "output", "o", "json", "Output format (json, table)")
 	rootCmd.Flags().BoolVarP(&serverMode, "server", "s", false, "Run in server mode")
+	rootCmd.Flags().BoolVarP(&generateRecommendations, "recommendations", "r", false, "Generate vulnerability and remediation recommendations")
 
 	if err := rootCmd.Execute(); err != nil {
 		logrus.Fatalf("Error executing command: %v", err)
@@ -218,4 +229,43 @@ func transformSBOM(s sbom.SBOM) interface{} {
 	serializableSBOM.Descriptor = s.Descriptor
 
 	return serializableSBOM
+}
+
+// getVulnerabilityRemediations generates vulnerability and remediation recommendations based on the SBOM using langchaingo
+func getVulnerabilityRemediations(s sbom.SBOM) string {
+	// Transform the SBOM to a JSON-friendly format
+	serializableSBOM := transformSBOM(s)
+
+	// Convert the SBOM to JSON
+	sbomJSON, err := json.Marshal(serializableSBOM)
+	if err != nil {
+		logrus.Fatalf("Error marshaling SBOM: %v", err)
+	}
+
+	// Initialize the Ollama LLM client directly without an API key
+	llm, err := ollama.New(ollama.WithModel("llama2"))
+	if err != nil {
+		logrus.Fatalf("Error creating Ollama client: %v", err)
+	}
+
+	// Create a context
+	ctx := context.Background()
+
+	// Create a prompt for generating vulnerability and remediation recommendations
+	prompt := fmt.Sprintf("Based on the following SBOM JSON, identify the vulnerabilities and provide recommendations for remediation:\n%s", string(sbomJSON))
+
+	// Generate completion with streaming output
+	var recommendations string
+	_, err = llm.Call(ctx, prompt,
+		llms.WithTemperature(0.8),
+		llms.WithStreamingFunc(func(ctx context.Context, chunk []byte) error {
+			recommendations += string(chunk)
+			return nil
+		}),
+	)
+	if err != nil {
+		logrus.Fatalf("Error generating recommendations: %v", err)
+	}
+
+	return recommendations
 }
