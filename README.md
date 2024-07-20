@@ -2,6 +2,16 @@
 
 SBOMInsight - Gain deep insights and secure your software supply chain 
 
+```
+Usage:
+  sbominsight [flags]
+
+Flags:
+  -h, --help            help for sbominsight
+  -i, --image string    Image reference to generate SBOM from
+  -o, --output string   Output format (json, table) (default "json")
+  -s, --server          Run in server mode
+```
 
 ## Usage 
 
@@ -37,6 +47,19 @@ Cataloged contents:
   ✔ File metadata                       [76 locations]
   ✔ Executables                         [17 executables]
 ```
+
+
+### run as server 
+
+```
+sbominsight -s    
+
+Server is running on http://localhost:8080
+
+curl "http://localhost:8080/sbom?image=postgres"
+
+```
+
 
 ## Installation
 
